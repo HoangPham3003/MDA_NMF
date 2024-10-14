@@ -287,36 +287,36 @@ def task_1(A):
     nmf_als_cr = find_convergence_rate(errs_als)
     plot_error_time_iters(errs_als, running_times_als, converge_points_als, converge_points_time_als, nmf_als_cr, color='purple', title='NMF_ALS-k20-restart1')
 
-    # print("\nRunning nmf_als with k = 20, restart = 5")
     # nmf_als with k = 20, restarts = 5
-    # (W_mr_als, H_mr_als, errs_mr_als, running_times_mr_als) = nmf(A, 20, optFunc=nmf_als, maxiter=100, repetitions=5)
-    # plot_multi_repeats(errs_mr_als, name='nmf_als', title='nmf_als_k20_5restarts')
+    print("\nRunning nmf_als with k = 20, restart = 5")
+    (W_mr_als, H_mr_als, errs_mr_als, running_times_mr_als) = nmf(A, 20, optFunc=nmf_als, maxiter=100, repetitions=5)
+    plot_multi_repeats(errs_mr_als, name='nmf_als', title='nmf_als_k20_5restarts')
     
-    print("\nRunning nmf_multiplicative with k = 20, restart = 1")
     # nmf_multiplicative with k = 20, restarts = 1
+    print("\nRunning nmf_multiplicative with k = 20, restart = 1")
     (W_multip, H_multip, errs_multip, running_times_multip) = nmf(A, 20, optFunc=nmf_multiplicative, maxiter=100, repetitions=1)
     converge_points_multip = find_converge_points(errs_multip)
     converge_points_time_multip = find_converge_points_time(errs_multip, running_times_multip, converge_points_multip)
     nmf_multip_cr = find_convergence_rate(errs_multip)
     plot_error_time_iters(errs_multip, running_times_multip, converge_points_multip, converge_points_time_multip, nmf_multip_cr, color='mediumblue', title='nmf_multiplicative-k20-restart1')
     
-    # print("\nRunning nmf_multiplicative with k = 20, restart = 5")
     # nmf_multiplicative with k = 20, restarts = 5
-    # (W_mr_multip, H_mr_multip, errs_mr_multip, running_times_mr_multip) = nmf(A, 20, optFunc=nmf_multiplicative, maxiter=100, repetitions=5)
-    # plot_multi_repeats(errs_mr_multip, name='nmf_multip', title='nmf_multiplicative_k20_5restarts')
+    print("\nRunning nmf_multiplicative with k = 20, restart = 5")
+    (W_mr_multip, H_mr_multip, errs_mr_multip, running_times_mr_multip) = nmf(A, 20, optFunc=nmf_multiplicative, maxiter=100, repetitions=5)
+    plot_multi_repeats(errs_mr_multip, name='nmf_multip', title='nmf_multiplicative_k20_5restarts')
     
-    print("\nRunning nmf_gd_opl with k = 20, restart = 1")
     # nmf_gd_opl with k = 20, restarts = 1
+    print("\nRunning nmf_gd_opl with k = 20, restart = 1")
     (W_opl, H_opl, errs_opl, running_times_opl) = nmf(A, 20, optFunc=nmf_gd_opl, maxiter=100, repetitions=1)
     converge_points_opl = find_converge_points(errs_opl, T1=0.1, T2=0.01, T3=0.001)
     converge_points_time_opl = find_converge_points_time(errs_opl, running_times_opl, converge_points_opl)
     nmf_opl_cr = find_convergence_rate(errs_opl)
     plot_error_time_iters(errs_opl, running_times_opl, converge_points_opl, converge_points_time_opl, nmf_opl_cr, color='gold', title='nmf_gd_opl-k20-restart1', rate_arrow_fix_pos=2*10**6)
     
-    # print("\nRunning nmf_gd_opl with k = 20, restart = 5")
     # nmf_gd_opl with k = 20, restarts = 5
-    # (W_mr_opl, H_mr_opl, errs_mr_opl, running_mr_opl) = nmf(A, 20, optFunc=nmf_gd_opl, maxiter=100, repetitions=5)
-    # plot_multi_repeats(errs_mr_opl, name='nmf_opl', title='nmf_gd_opl_k20_5restarts')
+    print("\nRunning nmf_gd_opl with k = 20, restart = 5")
+    (W_mr_opl, H_mr_opl, errs_mr_opl, running_mr_opl) = nmf(A, 20, optFunc=nmf_gd_opl, maxiter=100, repetitions=5)
+    plot_multi_repeats(errs_mr_opl, name='nmf_opl', title='nmf_gd_opl_k20_5restarts')
     
     # Compare 3 reconstruction errors line of 3 algorithms with k = 20, restarts = 1
     plt.plot(range(1, 101), errs_als, c='purple', label='NMF_als')
@@ -333,8 +333,169 @@ def task_1(A):
 
 
 ## ===================================================================
-## TASK 2: ANALYSIS THE DATA
+## TASK 3: Clustering and pLSA
 ## ===================================================================
+
+# nmi-score function
+def nmi_news(x):
+    gd = np.loadtxt('news_ground_truth.txt')
+    return 1 - nmi(gd, x)
+
+# ========================== Task 3 running ==========================
+
+def task_3(A, A_normalized):
+    # Compute K-means on originally normalized data
+    clustering_nmorig = KMeans(n_clusters=20, n_init=20).fit(A_normalized)
+    idx_nmorig = clustering_nmorig.labels_
+    nmi_nmorig = nmi_news(idx_nmorig)
+    print("\nNMI for clustering on normalized data = {}".format(nmi_nmorig))
+    
+    # Compute K-means on the first k principal components
+    # using Normailized data with Karhunen-Loeve (PCA)
+    Z = zscore(A)
+    U, S, V = svd(Z, full_matrices=False)
+    
+    # PCA with k = 5
+    print("\nPCA with k = 5")
+    A_PCA_k5 = np.dot(Z, V.T[:, :5])
+    nmi_pca_k5 = 0.
+    for i in tqdm(range(10)):
+        clustering_PCA_k5 = KMeans(n_clusters=20, n_init=20).fit(A_PCA_k5)
+        idx_PCA_k5 = clustering_PCA_k5.labels_
+        nmi_pca_k5 += nmi_news(idx_PCA_k5)
+    nmi_pca_k5 /= 10
+    print("NMI for clustering on 5 principal components = {}".format(nmi_pca_k5))
+    
+    # PCA with k = 14
+    print("\nPCA with k = 14")
+    A_PCA_k14 = np.dot(Z, V.T[:, :14])
+    nmi_pca_k14 = 0.
+    for i in tqdm(range(10)):
+        clustering_PCA_k14 = KMeans(n_clusters=20, n_init=20).fit(A_PCA_k14)
+        idx_PCA_k14 = clustering_PCA_k14.labels_
+        nmi_pca_k14 += nmi_news(idx_PCA_k14)
+    nmi_pca_k14 /= 10
+    print("NMI for clustering on 14 principal components = {}".format(nmi_pca_k14))
+    
+    # PCA with k = 20
+    print("\nPCA with k = 20")
+    A_PCA_k20 = np.dot(Z, V.T[:, :20])
+    nmi_pca_k20 = 0.
+    for i in tqdm(range(10)):
+        clustering_PCA_k20 = KMeans(n_clusters=20, n_init=20).fit(A_PCA_k20)
+        idx_PCA_k20 = clustering_PCA_k20.labels_
+        nmi_pca_k20 += nmi_news(idx_PCA_k20)
+    nmi_pca_k20 /= 10
+    print("NMI for clustering on 20 principal components = {}".format(nmi_pca_k20))
+    
+    # PCA with k = 32
+    print("\nPCA with k = 32")
+    A_PCA_k32 = np.dot(Z, V.T[:, :32])
+    nmi_pca_k32 = 0.
+    for i in tqdm(range(10)):
+        clustering_PCA_k32 = KMeans(n_clusters=20, n_init=20).fit(A_PCA_k32)
+        idx_PCA_k32 = clustering_PCA_k32.labels_
+        nmi_pca_k32 += nmi_news(idx_PCA_k32)
+    nmi_pca_k32 /= 10
+    print("NMI for clustering on 32 principal components = {}".format(nmi_pca_k32))
+    
+    # PCA with k = 40
+    print("\nPCA with k = 40")
+    A_PCA_k40 = np.dot(Z, V.T[:, :40])
+    nmi_pca_k40 = 0.
+    for i in tqdm(range(10)):
+        clustering_PCA_k40 = KMeans(n_clusters=20, n_init=20).fit(A_PCA_k40)
+        idx_PCA_k40 = clustering_PCA_k40.labels_
+        nmi_pca_k40 += nmi_news(idx_PCA_k40)
+    nmi_pca_k40 /= 10
+    print("NMI for clustering on 40 principal components = {}".format(nmi_pca_k40))
+    
+    # pLSA with k = 5
+    print("\npLSA with k = 5")
+    model_clt_gkl_k5 = NMF(n_components=5, init='random', solver='mu', beta_loss='kullback-leibler', max_iter=100, random_state=123)
+    W_clt_gkl_k5 = model_clt_gkl_k5.fit_transform(A_normalized)
+    W_clt_gkl_k5 = W_clt_gkl_k5 / np.sum(W_clt_gkl_k5, axis=0)
+    nmi_gkl_k5 = 0.
+    for i in tqdm(range(10)):
+        clustering_gkl_k5 = KMeans(n_clusters=20, n_init=20).fit(W_clt_gkl_k5)
+        idx_gkl_k5 = clustering_gkl_k5.labels_
+        nmi_gkl_k5 += nmi_news(idx_gkl_k5)
+    nmi_gkl_k5 /= 10
+    print("NMI for clustering on the rank 5 of W matrix of the NMF = {}".format(nmi_gkl_k5))
+    
+    # pLSA with k = 14
+    print("\npLSA with k = 14")
+    model_clt_gkl_k14 = NMF(n_components=14, init='random', solver='mu', beta_loss='kullback-leibler', max_iter=100, random_state=123)
+    W_clt_gkl_k14 = model_clt_gkl_k14.fit_transform(A_normalized)
+    W_clt_gkl_k14 = W_clt_gkl_k14 / np.sum(W_clt_gkl_k14, axis=0)
+    nmi_gkl_k14 = 0.
+    for i in tqdm(range(10)):
+        clustering_gkl_k14 = KMeans(n_clusters=20, n_init=20).fit(W_clt_gkl_k14)
+        idx_gkl_k14 = clustering_gkl_k14.labels_
+        nmi_gkl_k14 += nmi_news(idx_gkl_k14)
+    nmi_gkl_k14 /= 10
+    print("NMI for clustering on the rank 14 of W matrix of the NMF = {}".format(nmi_gkl_k14))
+    
+    # pLSA with k = 20
+    print("\npLSA with k = 20")
+    model_clt_gkl_k20 = NMF(n_components=20, init='random', solver='mu', beta_loss='kullback-leibler', max_iter=100, random_state=123)
+    W_clt_gkl_k20 = model_clt_gkl_k20.fit_transform(A_normalized)
+    W_clt_gkl_k20 = W_clt_gkl_k20 / np.sum(W_clt_gkl_k20, axis=0)
+    nmi_gkl_k20 = 0.
+    for i in tqdm(range(10)):
+        clustering_gkl_k20 = KMeans(n_clusters=20, n_init=20).fit(W_clt_gkl_k20)
+        idx_gkl_k20 = clustering_gkl_k20.labels_
+        nmi_gkl_k20 += nmi_news(idx_gkl_k20)
+    nmi_gkl_k20 /= 10
+    print("NMI for clustering on the rank 20 of W matrix of the NMF = {}".format(nmi_gkl_k20))
+    
+    # pLSA with k = 32
+    print("\npLSA with k = 32")
+    model_clt_gkl_k32 = NMF(n_components=32, init='random', solver='mu', beta_loss='kullback-leibler', max_iter=100, random_state=123)
+    W_clt_gkl_k32 = model_clt_gkl_k32.fit_transform(A_normalized)
+    W_clt_gkl_k32 = W_clt_gkl_k32 / np.sum(W_clt_gkl_k32, axis=0)
+    nmi_gkl_k32 = 0.
+    for i in tqdm(range(10)):
+        clustering_gkl_k32 = KMeans(n_clusters=20, n_init=20).fit(W_clt_gkl_k32)
+        idx_gkl_k32 = clustering_gkl_k32.labels_
+        nmi_gkl_k32 += nmi_news(idx_gkl_k32)
+    nmi_gkl_k32 /= 10
+    print("NMI for clustering on the rank 32 of W matrix of the NMF = {}".format(nmi_gkl_k32))
+    
+    # pLSA with k = 40
+    print("\npLSA with k = 40")
+    model_clt_gkl_k40 = NMF(n_components=40, init='random', solver='mu', beta_loss='kullback-leibler', max_iter=100, random_state=123)
+    W_clt_gkl_k40 = model_clt_gkl_k40.fit_transform(A_normalized)
+    W_clt_gkl_k40 = W_clt_gkl_k40 / np.sum(W_clt_gkl_k40, axis=0)
+    nmi_gkl_k40 = 0.
+    for i in tqdm(range(10)):
+        clustering_gkl_k40 = KMeans(n_clusters=20, n_init=20).fit(W_clt_gkl_k40)
+        idx_gkl_k40 = clustering_gkl_k40.labels_
+        nmi_gkl_k40 += nmi_news(idx_gkl_k40)
+    nmi_gkl_k40 /= 10
+    print("NMI for clustering on the rank 40 of W matrix of the NMF = {}".format(nmi_gkl_k40))
+    
+    data_nmi = [nmi_nmorig, nmi_pca_k5, nmi_pca_k14, nmi_pca_k20, nmi_pca_k32, nmi_pca_k40, nmi_gkl_k5, nmi_gkl_k14, nmi_gkl_k20, nmi_gkl_k32, nmi_gkl_k40]
+    labs = ['Original', 'PCA-k5', 'PCA-k14', 'PCA-k20', 'PCA-k32', 'PCA-k40', 'pLSA-k5', 'pLSA-k14', 'pLSA-k20', 'pLSA-k32', 'pLSA-k40']
+    colors = ['mediumblue'] + ['r'] * 5 + ['g'] * 5
+    
+    plt.figure(figsize=(12, 5))
+    plt.bar(labs, data_nmi, color=colors)
+
+    for i, v in enumerate(data_nmi):
+        plt.text(i-0.3, v, str(round(v, 3)), color='black', fontweight='bold')
+
+    plt.xlabel('Normalized data')
+    plt.ylabel('NMI')
+    plt.yticks(np.arange(0, 1.1, 0.1))
+    plt.xticks(rotation=90)
+    plt.grid(axis='y')
+    plt.show()
+    
+    
+    
+
+
 
 # ====== Task 2 utils (find top-10 terms, generate terms dict) =======
 # Find the top 10 terms for the first 3 rows of H
@@ -472,6 +633,7 @@ def task_2(A_normalized):
     plt.title('Reconstruction error of NMF K-L divergence versus different k')
     plt.show()
     
+    
 if __name__ == '__main__':
     # Load data
     print("Loading data...")
@@ -481,8 +643,7 @@ if __name__ == '__main__':
         header = f.readline()
         terms = [x.strip('"\n') for x in header.split(',')]
     print("Data loaded!")
-    
-    
+  
     # Run task 1
     print("Running task 1")
     task_1(data)
@@ -495,3 +656,8 @@ if __name__ == '__main__':
     print("Running task 2")
     task_2(data_normalized)
     print("Task 2 successfully!")
+    
+    # Run task 3
+    print("Running task 3")
+    task_3(data, data_normalized)
+    print("Task 3 successfully!")

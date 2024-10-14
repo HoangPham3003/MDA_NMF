@@ -280,37 +280,43 @@ def plot_multi_repeats(errs_hist, name='', title=''):
 # ========================================== Task 1 running  ========================================== 
 def task_1(A):
     # nmf_als with A and k = 20, restarts = 1
+    print("\nRunning nmf_als with k = 20, restart = 1")
     (W_als, H_als, errs_als, running_times_als) = nmf(A, 20, optFunc=nmf_als, maxiter=100, repetitions=1)
     converge_points_als = find_converge_points(errs_als)
     converge_points_time_als = find_converge_points_time(errs_als, running_times_als, converge_points_als)
     nmf_als_cr = find_convergence_rate(errs_als)
-    plot_error_time_iters(errs_als, running_times_als, converge_points_als, converge_points_time_als, nmf_als_cr, color='purple', title='NMF-ALS-k20')
+    plot_error_time_iters(errs_als, running_times_als, converge_points_als, converge_points_time_als, nmf_als_cr, color='purple', title='NMF_ALS-k20-restart1')
 
+    # print("\nRunning nmf_als with k = 20, restart = 5")
     # nmf_als with k = 20, restarts = 5
-    (W_mr_als, H_mr_als, errs_mr_als, running_times_mr_als) = nmf(A, 20, optFunc=nmf_als, maxiter=100, repetitions=5)
-    plot_multi_repeats(errs_mr_als, name='nmf_als', title='nmf_als_k20_5restarts')
+    # (W_mr_als, H_mr_als, errs_mr_als, running_times_mr_als) = nmf(A, 20, optFunc=nmf_als, maxiter=100, repetitions=5)
+    # plot_multi_repeats(errs_mr_als, name='nmf_als', title='nmf_als_k20_5restarts')
     
+    print("\nRunning nmf_multiplicative with k = 20, restart = 1")
     # nmf_multiplicative with k = 20, restarts = 1
     (W_multip, H_multip, errs_multip, running_times_multip) = nmf(A, 20, optFunc=nmf_multiplicative, maxiter=100, repetitions=1)
     converge_points_multip = find_converge_points(errs_multip)
     converge_points_time_multip = find_converge_points_time(errs_multip, running_times_multip, converge_points_multip)
     nmf_multip_cr = find_convergence_rate(errs_multip)
-    plot_error_time_iters(errs_multip, running_times_multip, converge_points_multip, converge_points_time_multip, nmf_multip_cr, color='mediumblue', title='nmf_multiplicative_k20')
+    plot_error_time_iters(errs_multip, running_times_multip, converge_points_multip, converge_points_time_multip, nmf_multip_cr, color='mediumblue', title='nmf_multiplicative-k20-restart1')
     
+    # print("\nRunning nmf_multiplicative with k = 20, restart = 5")
     # nmf_multiplicative with k = 20, restarts = 5
-    (W_mr_multip, H_mr_multip, errs_mr_multip, running_times_mr_multip) = nmf(A, 20, optFunc=nmf_multiplicative, maxiter=100, repetitions=5)
-    plot_multi_repeats(errs_mr_multip, name='nmf_multip', title='nmf_multiplicative_k20_5restarts')
+    # (W_mr_multip, H_mr_multip, errs_mr_multip, running_times_mr_multip) = nmf(A, 20, optFunc=nmf_multiplicative, maxiter=100, repetitions=5)
+    # plot_multi_repeats(errs_mr_multip, name='nmf_multip', title='nmf_multiplicative_k20_5restarts')
     
+    print("\nRunning nmf_gd_opl with k = 20, restart = 1")
     # nmf_gd_opl with k = 20, restarts = 1
     (W_opl, H_opl, errs_opl, running_times_opl) = nmf(A, 20, optFunc=nmf_gd_opl, maxiter=100, repetitions=1)
     converge_points_opl = find_converge_points(errs_opl, T1=0.1, T2=0.01, T3=0.001)
     converge_points_time_opl = find_converge_points_time(errs_opl, running_times_opl, converge_points_opl)
     nmf_opl_cr = find_convergence_rate(errs_opl)
-    plot_error_time_iters(errs_opl, running_times_opl, converge_points_opl, converge_points_time_opl, nmf_opl_cr, color='gold', title='nmf_gd_opl_k20', rate_arrow_fix_pos=2*10**6)
+    plot_error_time_iters(errs_opl, running_times_opl, converge_points_opl, converge_points_time_opl, nmf_opl_cr, color='gold', title='nmf_gd_opl-k20-restart1', rate_arrow_fix_pos=2*10**6)
     
-    # # nmf_gd_opl with k = 20, restarts = 5
-    (W_mr_opl, H_mr_opl, errs_mr_opl, running_mr_opl) = nmf(A, 20, optFunc=nmf_gd_opl, maxiter=100, repetitions=5)
-    plot_multi_repeats(errs_mr_opl, name='nmf_opl', title='nmf_gd_opl_k20_5restarts')
+    # print("\nRunning nmf_gd_opl with k = 20, restart = 5")
+    # nmf_gd_opl with k = 20, restarts = 5
+    # (W_mr_opl, H_mr_opl, errs_mr_opl, running_mr_opl) = nmf(A, 20, optFunc=nmf_gd_opl, maxiter=100, repetitions=5)
+    # plot_multi_repeats(errs_mr_opl, name='nmf_opl', title='nmf_gd_opl_k20_5restarts')
     
     # Compare 3 reconstruction errors line of 3 algorithms with k = 20, restarts = 1
     plt.plot(range(1, 101), errs_als, c='purple', label='NMF_als')
@@ -346,7 +352,7 @@ def find_top10terms(H):
 def gen_terms_dict(top_terms):
     terms_dict = []
     for x in top_terms:
-      a = {}
+        a = {}
         for i, t in enumerate(x):
             a['term_{}'.format(i+1)] = t
         terms_dict.append(a)
@@ -358,6 +364,7 @@ def gen_terms_dict(top_terms):
 def task_2(A_normalized):
     
     # NMF-ALS with k = 5
+    print("\nFind top-10 terms of NMF-ALS with k = 5")
     (W_als_nm_k5, H_als_nm_k5, errs_als_nm_k5, running_times_als_nm_k5) = nmf(A_normalized, 5,
                                                                             optFunc=nmf_als, maxiter=100, repetitions=1)
     top_terms_Hk5 = find_top10terms(H_als_nm_k5)
@@ -366,6 +373,7 @@ def task_2(A_normalized):
     print(terms_dict_Hk5)
     
     # NMF-ALS with k = 14
+    print("\nFind top-10 terms of NMF-ALS with k = 14")
     (W_als_nm_k14, H_als_nm_k14, errs_als_nm_k14, running_times_als_nm_k14) = nmf(A_normalized, 14,
                                                                             optFunc=nmf_als, maxiter=100, repetitions=1)
     top_terms_Hk14 = find_top10terms(H_als_nm_k14)
@@ -374,6 +382,7 @@ def task_2(A_normalized):
     print(terms_dict_Hk14)
     
     # NMF-ALS with k = 20
+    print("\nFind top-10 terms of NMF-ALS with k = 20")
     (W_als_nm_k20, H_als_nm_k20, errs_als_nm_k20, running_times_als_nm_k20) = nmf(A_normalized, 20,
                                                                             optFunc=nmf_als, maxiter=100, repetitions=1)
     top_terms_Hk20 = find_top10terms(H_als_nm_k20)
@@ -382,6 +391,7 @@ def task_2(A_normalized):
     print(terms_dict_Hk20)
     
     # NMF-ALS with k = 32
+    print("\nFind top-10 terms of NMF-ALS with k = 32")
     (W_als_nm_k32, H_als_nm_k32, errs_als_nm_k32, running_times_als_nm_k32) = nmf(A_normalized, 32,
                                                                             optFunc=nmf_als, maxiter=100, repetitions=1)
     top_terms_Hk32 = find_top10terms(H_als_nm_k32)
@@ -390,6 +400,7 @@ def task_2(A_normalized):
     print(terms_dict_Hk32)
     
     # NMF-ALS with k = 40
+    print("\nFind top-10 terms of NMF-ALS with k = 40")
     (W_als_nm_k40, H_als_nm_k40, errs_als_nm_k40, running_times_als_nm_k40) = nmf(A_normalized, 40,
                                                                             optFunc=nmf_als, maxiter=100, repetitions=1)
     top_terms_Hk40 = find_top10terms(H_als_nm_k40)
@@ -398,6 +409,7 @@ def task_2(A_normalized):
     print(terms_dict_Hk40)
     
     # K-L divergence with k = 5
+    print("\nFind top-10 terms of NMF-KL Divergence with k = 5")
     model_gkl_k5 = NMF(n_components=5, init='random', solver='mu', beta_loss='kullback-leibler', max_iter=100, verbose=True, random_state=123)
     W_gkl_k5 = model_gkl_k5.fit_transform(A_normalized)
     H_gkl_k5 = model_gkl_k5.components_
@@ -407,6 +419,7 @@ def task_2(A_normalized):
     print(terms_dict_gkl_Hk20)
     
     # K-L divergence with k = 14
+    print("\nFind top-10 terms of NMF-KL Divergence with k = 14")
     model_gkl_k14 = NMF(n_components=14, init='random', solver='mu', beta_loss='kullback-leibler', max_iter=100, verbose=True, random_state=123)
     W_gkl_k14 = model_gkl_k14.fit_transform(A_normalized)
     H_gkl_k14 = model_gkl_k14.components_
@@ -416,6 +429,7 @@ def task_2(A_normalized):
     print(terms_dict_gkl_Hk14)
     
     # K-L divergence with k = 20
+    print("\nFind top-10 terms of NMF-KL Divergence with k = 20")
     model_gkl_k20 = NMF(n_components=20, init='random', solver='mu', beta_loss='kullback-leibler', max_iter=100, verbose=True, random_state=123)
     W_gkl_k20 = model_gkl_k20.fit_transform(A_normalized)
     H_gkl_k20 = model_gkl_k20.components_
@@ -425,6 +439,7 @@ def task_2(A_normalized):
     print(terms_dict_gkl_Hk20)
     
     # K-L divergence with k = 32
+    print("\nFind top-10 terms of NMF-KL Divergence with k = 32")
     model_gkl_k32 = NMF(n_components=32, init='random', solver='mu', beta_loss='kullback-leibler', max_iter=100, verbose=True, random_state=123)
     W_gkl_k32 = model_gkl_k32.fit_transform(A_normalized)
     H_gkl_k32 = model_gkl_k32.components_
@@ -434,6 +449,7 @@ def task_2(A_normalized):
     print(terms_dict_gkl_Hk32)
     
     # K-L divergence with k = 40
+    print("\nFind top-10 terms of NMF-KL Divergence with k = 40")
     model_gkl_k40 = NMF(n_components=40, init='random', solver='mu', beta_loss='kullback-leibler', max_iter=100, verbose=True, random_state=123)
     W_gkl_k40 = model_gkl_k40.fit_transform(A_normalized)
     H_gkl_k40 = model_gkl_k40.components_
@@ -443,10 +459,10 @@ def task_2(A_normalized):
     print(terms_dict_gkl_Hk40)
     
     errors_gkl = [model_gkl_k5.reconstruction_err_, 
-                  model_gkl_k14.reconstruction_err_, 
-                  model_gkl_k20.reconstruction_err_, 
-                  model_gkl_k32.reconstruction_err_, 
-                  model_gkl_k40.reconstruction_err_]
+                    model_gkl_k14.reconstruction_err_, 
+                    model_gkl_k20.reconstruction_err_, 
+                    model_gkl_k32.reconstruction_err_, 
+                    model_gkl_k40.reconstruction_err_]
     
     plt.plot([5, 14, 20, 32, 40], errors_gkl)
     plt.scatter([5, 14, 20, 32, 40], errors_gkl)
@@ -472,8 +488,10 @@ if __name__ == '__main__':
     task_1(data)
     print("Task 1 succesfully!")
     
+    # Normalize data
     data_normalized = data / np.sum(data)
     
+    # Run task 2
     print("Running task 2")
     task_2(data_normalized)
     print("Task 2 successfully!")
